@@ -12,7 +12,7 @@ import {
 export type CustomReducer<
   TState,
   TAction extends Record<string, ActionCreator<any>>,
-  TEnvironment extends Object = never,
+  TEnvironment extends object = never,
 > = {
   [K in keyof TAction]:
     | ((state: TState, action: ReturnType<TAction[K]>) => void)
@@ -30,13 +30,13 @@ export type CustomReducer<
 export const createReducerWithEffects = <
   TState,
   TAction extends Record<string, (...args: any) => any>,
-  TEnvironment extends Object,
+  TEnvironment extends object,
 >(
   initialState: TState,
   actions: TAction,
   customReducer: CustomReducer<TState, TAction, TEnvironment>,
 ) => {
-  const reducer = createReducer(initialState, (builder) =>
+  const reducer = createReducer(initialState, (reducerBuilder) =>
     Object.keys(customReducer).reduce(
       (builder, key) =>
         builder.addCase(actions[key] as any, (state, action) => {
@@ -45,7 +45,7 @@ export const createReducerWithEffects = <
             : (customReducer[key] as any).handler(state, action);
           return;
         }),
-      builder,
+      reducerBuilder,
     ),
   );
 
@@ -65,13 +65,13 @@ export const createReducerWithEffects = <
   return { reducer, actions, effects };
 };
 
-export function createStoreFactory<TState, TAction extends Record<string, any>, TEnvironment extends Object>(config: {
+export function createStoreFactory<TState, TAction extends Record<string, any>, TEnvironment extends object>(config: {
   initialState: TState;
   actions: TAction;
   environment: TEnvironment;
   reducer: CustomReducer<TState, TAction, TEnvironment>;
 }): ReturnType<typeof _createStoreFactory<TState, TAction, TEnvironment>>;
-export function createStoreFactory<TState, TAction extends Record<string, any>, TEnvironment extends Object>(
+export function createStoreFactory<TState, TAction extends Record<string, any>, TEnvironment extends object>(
   initialState: TState,
   actions: TAction,
   customReducer: CustomReducer<TState, TAction, TEnvironment>,
@@ -82,12 +82,12 @@ export function createStoreFactory(arg: any, actions?: any, reducer?: any) {
   return _createStoreFactory(arg, actions, reducer);
 }
 
-const _createStoreFactory = <TState, TAction extends Record<string, (args?: any) => any>, TEnvironment extends Object>(
+const _createStoreFactory = <TState, TAction extends Record<string, (args?: any) => any>, TEnvironment extends object>(
   initialState: TState,
   actions: TAction,
   customReducer: CustomReducer<TState, TAction, TEnvironment>,
 ) => {
-  const reducer = createReducer(initialState, (builder) =>
+  const reducer = createReducer(initialState, (reducerBuilder) =>
     Object.keys(customReducer).reduce(
       (builder, key) =>
         builder.addCase(actions[key] as any, (state, action) => {
@@ -96,7 +96,7 @@ const _createStoreFactory = <TState, TAction extends Record<string, (args?: any)
             : (customReducer[key] as any).handler(state, action);
           return;
         }),
-      builder,
+      reducerBuilder,
     ),
   );
 
