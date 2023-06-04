@@ -1,26 +1,26 @@
 # Package Name
 
-redux-effects-middleware
+redux-rtk-effects
 
 ## Description
 
-redux-effects-middleware is an npm package that provides a middleware for Redux that enables the usage of side effects and asynchronous actions in combination with the @reduxjs/toolkit library. It allows you to define custom reducers with associated effects, and creates a store factory function that sets up the store with the necessary middleware to handle these effects.
+**redux-rtk-effects** is an npm package that enable the creation of reducers with effects definition for the [@reduxjs/toolkit](https://redux-toolkit.js.org/) library. It allows you to define custom reducers with associated effects, and creates a store factory function that sets up the store with the necessary middleware to handle these effects.
 
 ## Installation
 
 Use npm to install the package:
 
 ```
-npm install redux-effects-middleware
+npm install redux-rtk-effects
 ```
 
 ## Usage
 
-To use redux-effects-middleware in your Redux application, follow the example below:
+To use redux-rtk-effects in your Redux application, follow the example below:
 
-```javascript
-import { createAction } from "@reduxjs/toolkit";
-import { createStoreFactory, createEnvironment } from "redux-effects-middleware";
+```typescript
+import { createAction } from '@reduxjs/toolkit';
+import { createStoreFactory, createEnvironment } from 'redux-rtk-effects';
 
 // Define your data models and environment interfaces
 interface User {
@@ -35,12 +35,12 @@ interface Environment {
   };
 }
 
-// Create actions and store factory using createStoreFactory function
-export const { actions, factory } = createStoreFactory({
+// Create store factory using createStoreFactory function
+const { factory } = createStoreFactory({
   initialState: { user: null as null | User, isLoading: false },
   actions: {
-    onModuleInit: createAction("onModuleInit"),
-    handleUserResponse: createAction<User>("handleUserResponse"),
+    onModuleInit: createAction('onModuleInit'),
+    handleUserResponse: createAction<User>('handleUserResponse'),
   },
   environment: createEnvironment<Environment>(),
   reducer: {
@@ -48,6 +48,7 @@ export const { actions, factory } = createStoreFactory({
       handler: (state) => {
         state.isLoading = true;
       },
+      // Define effect to be triggered once the actions is dispatched
       effect: async (_, { dispatch, extra }) => {
         const user = await extra.environment.userRepository.getUser();
         dispatch(extra.actions.handleUserResponse(user));
@@ -63,7 +64,7 @@ export const { actions, factory } = createStoreFactory({
 // Create the store using the factory function and pass in the environment
 const environment: Environment = {
   userRepository: {
-    getUser: () => Promise.resolve({ name: "John Doe", email: "john.doe@example.com", avatarSrc: "avatar.jpg" }),
+    getUser: () => Promise.resolve({ name: 'John Doe', email: 'john.doe@example.com', avatarSrc: 'avatar.jpg' }),
   },
 };
 
@@ -91,26 +92,4 @@ function createStoreFactory<TState, TAction extends Record<string, any>, TEnviro
     reducer: CustomReducer<TState, TAction, TEnvironment>;
   }
 ): ReturnType<typeof _createStoreFactory<TState, TAction, TEnvironment>>;
-```
-
-### `createEnvironment`
-
-A generic function that creates an empty environment object. Use this function to define the structure of your environment.
-
-**Signature:**
-
-```javascript
-function createEnvironment<T>(): T;
-```
-
-### `CustomReducer`
-
-A type definition that represents a custom reducer with associated effects.
-
-**Signature:**
-
-```javascript
-type CustomReducer<TState, TAction extends Record<string, ActionCreator<any>>, TEnvironment extends Object = never> = {
-  [K in keyof TAction]:
-    | ((state: TState, action:
 ```
