@@ -1,7 +1,7 @@
 import { assertType, expect, expectTypeOf, test } from 'vitest';
 import { createEnvironment } from '../src/createEnvironment';
 
-type CustomRepository = {};
+type CustomRepository = Record<string, () => any>;
 
 type CustomEnvironment = {
   repository: CustomRepository;
