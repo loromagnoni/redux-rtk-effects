@@ -1,6 +1,6 @@
 {
   "name": "redux-rtk-effect",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A package to define effects inside redux reducer, compatible with RTK ( Redux Toolkit )",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
