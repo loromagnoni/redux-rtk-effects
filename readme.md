@@ -1,41 +1,62 @@
-# Package Name
+# Redux RTK Effects
 
-redux-rtk-effects
+Centralize your Redux application logic in one place.
 
 ## Description
 
-**redux-rtk-effects** is an npm package that enable the creation of reducers with effects definition for the [@reduxjs/toolkit](https://redux-toolkit.js.org/) library. It allows you to define custom reducers with associated effects, and creates a store factory function that sets up the store with the necessary middleware to handle these effects.
+**redux-rtk-effects** enables developers to centralize their Redux application logic inside the reducer. It does so, providing a fully typed reducer API that allows to define action handlers with associated effects.
+
+```typescript
+
+reducer: {
+  onModuleInit: {
+    handler: (state) => {
+      state.isLoading = true;
+    },
+    effect: async (_, { dispatch, extra }) => {
+      const user = await extra.environment.userRepository.getUser();
+      dispatch(extra.actions.handleUserResponse(user));
+    },
+  },
+  handleUserResponse: (state, { payload }) => {
+      state.user = payload;
+      state.isLoading = false;
+  },
+}
+```
 
 ## Installation
 
-Use npm to install the package:
+You can install the package with npm:
 
 ```
 npm install redux-rtk-effects
 ```
 
-## Usage
+or yarn:
 
-To use redux-rtk-effects in your Redux application, follow the example below:
+```
+yarn add redux-rtk-effects
+```
+
+## Example usage
+
+To use **redux-rtk-effects** in your application, follow the example below:
 
 ```typescript
 import { createAction } from '@reduxjs/toolkit';
 import { createStoreFactory, createEnvironment } from 'redux-rtk-effects';
 
-// Define your data models and environment interfaces
-interface User {
-  name: string;
-  email: string;
-  avatarSrc: string;
-}
-
+// Define dependencies needed inside side-effects.
 interface Environment {
   userRepository: {
-    getUser: () => Promise<User>;
+    getUser: () => Promise<{
+      name: string;
+    }>;
   };
 }
 
-// Create store factory using createStoreFactory function
+// Create store factory using createStoreFactory API
 const { factory } = createStoreFactory({
   initialState: { user: null as null | User, isLoading: false },
   actions: {
@@ -44,36 +65,46 @@ const { factory } = createStoreFactory({
   },
   environment: createEnvironment<Environment>(),
   reducer: {
+    // You can define action handlers as simple functions
+    handleUserResponse: (state, { payload }) => {
+      state.user = payload;
+      state.isLoading = false;
+    },
+    // Or, you can definec action handlers with associated effects
     onModuleInit: {
       handler: (state) => {
         state.isLoading = true;
       },
-      // Define effect to be triggered once the actions is dispatched
+      // Effect that will be triggered once
+      // the onModuleInit action is dispatched
       effect: async (_, { dispatch, extra }) => {
         const user = await extra.environment.userRepository.getUser();
         dispatch(extra.actions.handleUserResponse(user));
       },
     },
-    handleUserResponse: (state, { payload }) => {
-      state.user = payload;
-      state.isLoading = false;
-    },
   },
 });
 
-// Create the store using the factory function and pass in the environment
+// Create the store using the factory function and inject in the environment
 const environment: Environment = {
   userRepository: {
-    getUser: () => Promise.resolve({ name: 'John Doe', email: 'john.doe@example.com', avatarSrc: 'avatar.jpg' }),
+    getUser: () => Promise.resolve({ name: 'John Doe' }),
   },
 };
 
+// Here you have your RTK store! With effects configuration setup.
 const store = factory(environment);
 ```
 
-In the example above, we define two actions (`onModuleInit` and `handleUserResponse`) and a custom reducer with associated effects. The `onModuleInit` action is dispatched when the module initializes, triggering the associated effect. The effect retrieves user data asynchronously from the environment and dispatches the `handleUserResponse` action with the received data.
+## Why another Redux side-effect library?
 
-The `createEnvironment` function is used to create an empty environment object, which is then passed to the store factory function along with the initial state, actions, and custom reducer. Finally, the store is created by calling the factory function and passing in the environment.
+Looking at the most used alternatives, they all handle side effects inside middlewares, scattering application logic between those and the reducer.
+
+Taking inspiration from the [Elm architecture](https://guide.elm-lang.org/architecture/) and [Swift Composable Architecture](https://github.com/pointfreeco/swift-composable-architecture), **redux-rtk-effects** aims to centralize application logic inside the reducer, providing a fully typed API to define action handlers with associated effects.
+
+At the same time, the Redux ecosystem is evolving toward the usage of Redux Toolkit as suggested solution, for this reason **redux-rtk-effects** is built on top of it, and fully compatible with its features.
+
+In fact, the effects defined adhere to the [Listener API](https://redux-toolkit.js.org/api/createListenerMiddleware#listener-api) exposed by [Redux Toolkit](https://redux-toolkit.js.org/), which covers several advanced side effects use cases, and support dependency injection by design.
 
 ## API
 
@@ -84,7 +115,11 @@ A function that creates a store factory with the necessary middleware to handle 
 **Signature:**
 
 ```javascript
-function createStoreFactory<TState, TAction extends Record<string, any>, TEnvironment extends Object>(
+function createStoreFactory<
+  TState,
+  TAction extends Record<string, any>,
+  TEnvironment extends object
+>(
   config: {
     initialState: TState;
     actions: TAction;
