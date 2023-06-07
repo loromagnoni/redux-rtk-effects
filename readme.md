@@ -110,21 +110,16 @@ In fact, the effects defined adhere to the [Listener API](https://redux-toolkit.
 
 ### `createStoreFactory`
 
-A function that creates a store factory with the necessary middleware to handle effects.
+A function that creates a store factory. The factory accepts a paramether which match the environment defined type. The store created is a RTK store, with the effects middleware applied.
 
-**Signature:**
+### `createEffectsMiddleware`
 
-```javascript
-function createStoreFactory<
-  TState,
-  TAction extends Record<string, any>,
-  TEnvironment extends object
->(
-  config: {
-    initialState: TState;
-    actions: TAction;
-    environment: TEnvironment;
-    reducer: CustomReducer<TState, TAction, TEnvironment>;
-  }
-): ReturnType<typeof _createStoreFactory<TState, TAction, TEnvironment>>;
-```
+A function that creates a `ListenerMiddlewareInstance` , middleware that can be applied to a Redux store. This middleware binds effects to their actions, so that once an action is dispatched, the associated effect is triggered.
+
+### `createEnvironment`
+
+A function that creates a typed object. This object can be used to type the environment required by the store factory.
+
+### `createReducerWithEffects`
+
+A function that creates a Redux reducer end its effects, given a reducer with effect definition.

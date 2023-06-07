@@ -1,4 +1,9 @@
-import { Dispatch, ListenerEffect, ActionCreator, createReducer } from '@reduxjs/toolkit';
+import {
+  Dispatch,
+  ListenerEffect,
+  ActionCreator,
+  createReducer,
+} from '@reduxjs/toolkit';
 
 export type CustomReducer<
   TState,

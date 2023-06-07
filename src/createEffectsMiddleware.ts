@@ -6,7 +6,11 @@ import {
   createListenerMiddleware,
 } from '@reduxjs/toolkit';
 
-export const createEffectsMiddleware = <TState, TAction extends Record<string, (...args: any) => any>, TEnvironment>(
+export const createEffectsMiddleware = <
+  TState,
+  TAction extends Record<string, (...args: any) => any>,
+  TEnvironment,
+>(
   actions: TAction,
   effects: Record<
     keyof TAction,
